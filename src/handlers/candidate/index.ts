@@ -23,6 +23,7 @@ export {
   createCandidateParent,
   updateCandidateParentById,
   createAgentCandidateParent,
+  updateCandidatePlustwoById,
 } from "./createCandidateParent";
 export {
   getCandidateParent,

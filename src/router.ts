@@ -77,6 +77,7 @@ import {
   signin,
   signout,
   updateCandidateParentById,
+  updateCandidatePlustwoById,
   updateJeeApplication,
 } from "./handlers/candidate";
 import { requireAuth } from "./middlewares/require-auth";
@@ -237,6 +238,7 @@ router.put("/candidate/onboarding/agent", requireAuth, putAgentOnboarding);
 router.get("/candidate/:id", requireAuth, getCandidateById);
 router.put("/candidate/:id", requireAuth, putCandidateById);
 router.put("/candidate/:id/parent", requireAuth, updateCandidateParentById);
+router.put("/candidate/:id/plustwo", requireAuth, updateCandidatePlustwoById);
 router.get("/candidates", getAllCandidatesInfo);
 
 //master data
