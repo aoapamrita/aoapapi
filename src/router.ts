@@ -139,7 +139,9 @@ import { importlocation, downloadExcel } from "./handlers/master";
 import {
   getApplicationReport,
   getDistrictWiseReport,
+  getExamCityCityReport,
   getExamCityReport,
+  getExamCityStateReport,
   getExamRegisteredReport,
   getRefererReport,
   getStateWiseReport,
@@ -416,6 +418,16 @@ router.post("/admin/reports/utmsource", requireAuth, getUTMReportBySource);
 router.post("/admin/reports/application", requireAuth, getApplicationReport);
 router.post("/admin/reports/state", requireAuth, getStateWiseReport);
 router.post("/admin/reports/examcity", requireAuth, getExamCityReport);
+router.get(
+  "/admin/reports/examcity/states/:entranceid",
+  requireAuth,
+  getExamCityStateReport
+);
+router.get(
+  "/admin/reports/examcity/city/:entranceid",
+  requireAuth,
+  getExamCityCityReport
+);
 router.post(
   "/admin/reports/district/:stateId",
   requireAuth,

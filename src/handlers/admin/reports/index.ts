@@ -5,4 +5,8 @@ export { getStateWiseReport } from "./state";
 export { getDistrictWiseReport } from "./district";
 export { getExamRegisteredReport } from "./exam";
 export { getRefererReport } from "./referer";
-export { getExamCityReport } from "./examcity";
+export {
+  getExamCityReport,
+  getExamCityStateReport,
+  getExamCityCityReport,
+} from "./examcity";

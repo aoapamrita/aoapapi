@@ -113,3 +113,114 @@ export const getExamCityReport = async (req, res) => {
     throw new BadRequestError("Request cannot be processed");
   }
 };
+
+export const getExamCityStateReport = async (req, res) => {
+  const { entranceid } = req.params;
+  let queryString = Prisma.sql`
+        SELECT DISTINCT
+        s.id AS statecode,
+        s.name AS statename
+        FROM
+        "ExamCity" ec
+        JOIN
+        "City" c ON ec."cityId" = c.id
+        JOIN
+        "District" d ON c."districtId" = d.id
+        JOIN
+        "State" s ON d."stateId" = s.id
+        WHERE
+        ec."entranceId" = ${entranceid};
+    `;
+  try {
+    const resultRows = await prisma.$queryRaw(queryString);
+
+    const resultArr = resultRows as any[];
+
+    console.log("result arr", resultArr);
+    // Convert BigInt to regular numbers
+    const formatted = resultArr.map((row) => ({
+      CountryCode: "IND",
+      StateCode: row.statecode,
+      StateName: row.statename,
+    }));
+
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Add a worksheet to the workbook
+    const worksheet = XLSX.utils.json_to_sheet(formatted);
+
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
+
+    // Set the appropriate headers for the response
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader("Content-Disposition", "attachment; filename=excel.xlsx");
+
+    // Send the workbook directly to the response
+    res.end(XLSX.write(workbook, { bookType: "xlsx", type: "buffer" }));
+  } catch (error) {
+    console.log(error);
+    throw new BadRequestError("Request cannot be processed");
+  }
+};
+
+export const getExamCityCityReport = async (req, res) => {
+  const { entranceid } = req.params;
+  let queryString = Prisma.sql`
+          SELECT DISTINCT
+          c.id AS citycode,
+          c.name AS cityname,
+          s.id AS statecode
+          FROM
+          "ExamCity" ec
+          JOIN
+          "City" c ON ec."cityId" = c.id
+          JOIN
+          "District" d ON c."districtId" = d.id
+          JOIN
+          "State" s ON d."stateId" = s.id
+          WHERE
+          ec."entranceId" = ${entranceid};
+      `;
+  try {
+    const resultRows = await prisma.$queryRaw(queryString);
+
+    const resultArr = resultRows as any[];
+
+    console.log("result arr", resultArr);
+    // Convert BigInt to regular numbers
+
+    const formatted = resultArr.map((row) => ({
+      CountryCode: "IND",
+      StateCode: row.statecode,
+      CityCode: row.citycode,
+      CityName: row.cityname,
+    }));
+
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Add a worksheet to the workbook
+    const worksheet = XLSX.utils.json_to_sheet(formatted);
+
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
+
+    // Set the appropriate headers for the response
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader("Content-Disposition", "attachment; filename=excel.xlsx");
+
+    // Send the workbook directly to the response
+    res.end(XLSX.write(workbook, { bookType: "xlsx", type: "buffer" }));
+  } catch (error) {
+    console.log(error);
+    throw new BadRequestError("Request cannot be processed");
+  }
+};
