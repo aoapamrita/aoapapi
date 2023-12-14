@@ -36,6 +36,7 @@ model InfoSource {
 model State {
   id          Int           @id @default(autoincrement())
   name        String        @unique
+  code        Int           @default(0)
   districts   District[]
   createdAt   DateTime      @default(now())
   Candidate   Candidate[]
@@ -57,6 +58,7 @@ model District {
 model City {
   id         Int         @id @default(autoincrement())
   name       String
+  code       Int         @default(0)
   district   District    @relation(fields: [districtId], references: [id])
   districtId Int
   createdAt  DateTime    @default(now())

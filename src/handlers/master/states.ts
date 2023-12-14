@@ -27,12 +27,10 @@ export const addState = async (req, res) => {
 export const updateState = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name } = req.body;
+    const data = req.body;
     const item = await prisma.state.update({
       where: { id: parseInt(id) },
-      data: {
-        name,
-      },
+      data,
     });
     return res.json(item);
   } catch (error) {

@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "City" ADD COLUMN     "code" INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "State" ADD COLUMN     "code" INTEGER NOT NULL DEFAULT 0;

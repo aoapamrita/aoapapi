@@ -118,7 +118,7 @@ export const getExamCityStateReport = async (req, res) => {
   const { entranceid } = req.params;
   let queryString = Prisma.sql`
         SELECT DISTINCT
-        s.id AS statecode,
+        s.code AS statecode,
         s.name AS statename
         FROM
         "ExamCity" ec
@@ -139,9 +139,10 @@ export const getExamCityStateReport = async (req, res) => {
     console.log("result arr", resultArr);
     // Convert BigInt to regular numbers
     const formatted = resultArr.map((row) => ({
-      CountryCode: "IND",
-      StateCode: row.statecode,
-      StateName: row.statename,
+      "Country Code": "IND",
+      "State Code": row.statecode,
+      "State Name": row.statename,
+      Action: "Add",
     }));
 
     // Create a new workbook
@@ -171,10 +172,10 @@ export const getExamCityStateReport = async (req, res) => {
 export const getExamCityCityReport = async (req, res) => {
   const { entranceid } = req.params;
   let queryString = Prisma.sql`
-          SELECT DISTINCT
-          c.id AS citycode,
+          SELECT
+          c.code AS citycode,
           c.name AS cityname,
-          s.id AS statecode
+          s.code AS statecode
           FROM
           "ExamCity" ec
           JOIN
@@ -195,10 +196,11 @@ export const getExamCityCityReport = async (req, res) => {
     // Convert BigInt to regular numbers
 
     const formatted = resultArr.map((row) => ({
-      CountryCode: "IND",
-      StateCode: row.statecode,
-      CityCode: row.citycode,
-      CityName: row.cityname,
+      "Country Code": "IND",
+      "State Code": row.statecode,
+      "City Code": row.citycode,
+      "City Name": row.cityname,
+      Action: "Add",
     }));
 
     // Create a new workbook
