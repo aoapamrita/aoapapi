@@ -117,19 +117,19 @@ export const getExamCityReport = async (req, res) => {
 export const getExamCityStateReport = async (req, res) => {
   const { entranceid } = req.params;
   let queryString = Prisma.sql`
-        SELECT DISTINCT
-        s.code AS statecode,
-        s.name AS statename
-        FROM
-        "ExamCity" ec
-        JOIN
-        "City" c ON ec."cityId" = c.id
-        JOIN
-        "District" d ON c."districtId" = d.id
-        JOIN
-        "State" s ON d."stateId" = s.id
-        WHERE
-        ec."entranceId" = ${entranceid};
+    SELECT DISTINCT
+    s.id AS statecode,
+    s.name AS statename
+    FROM
+    "State" s
+    LEFT JOIN
+    "District" d ON s.id = d."stateId"
+    LEFT JOIN
+    "City" c ON d.id = c."districtId"
+    LEFT JOIN
+    "ExamCity" ec ON c.id = ec."cityId"
+    WHERE
+    ec."entranceId" = ${entranceid} OR ec."entranceId" IS NULL;
     `;
   try {
     const resultRows = await prisma.$queryRaw(queryString);
@@ -173,9 +173,9 @@ export const getExamCityCityReport = async (req, res) => {
   const { entranceid } = req.params;
   let queryString = Prisma.sql`
           SELECT
-          c.code AS citycode,
+          c.id AS citycode,
           c.name AS cityname,
-          s.code AS statecode
+          s.id AS statecode
           FROM
           "ExamCity" ec
           JOIN

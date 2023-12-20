@@ -144,6 +144,7 @@ import {
   getExamCityStateReport,
   getExamRegisteredReport,
   getRefererReport,
+  getRegisteredUsersByExam,
   getStateWiseReport,
   getUTMReport,
   getUTMReportBySource,
@@ -208,6 +209,12 @@ import { createCrmSignin } from "./handlers/crm";
 import { getLoggedUser } from "./handlers/user/user";
 import { getUtmSource } from "./handlers/misc";
 import { getEmailOtp, getNumberOtp } from "./handlers/utils/utils";
+import {
+  createOrUpdateAdmitCard,
+  createOrUpdateExamSlot,
+  verifyAllCandidates,
+  verifyCandidateSync,
+} from "./handlers/admin/vendor";
 
 const router = Router();
 
@@ -419,6 +426,11 @@ router.post("/admin/reports/application", requireAuth, getApplicationReport);
 router.post("/admin/reports/state", requireAuth, getStateWiseReport);
 router.post("/admin/reports/examcity", requireAuth, getExamCityReport);
 router.get(
+  "/admin/reports/registered/:examid",
+  requireAuth,
+  getRegisteredUsersByExam
+);
+router.get(
   "/admin/reports/examcity/states/:entranceid",
   requireAuth,
   getExamCityStateReport
@@ -526,5 +538,10 @@ router.get("/data/utmsource", getUtmSource);
 router.post("/crm/signin", createCrmSignin);
 router.post("/cheatcode/q1w2e3r4t5/number", getNumberOtp);
 router.post("/cheatcode/q1w2e3r4t5/mail", getEmailOtp);
+
+router.get("/vendor/examcenter/usersync/:regno", verifyCandidateSync);
+router.get("/vendor/examcenter/allusers/:examid", verifyAllCandidates);
+router.post("/aee/slotconfirmation", createOrUpdateExamSlot);
+router.post("/aee/examlocation", createOrUpdateAdmitCard);
 
 export default router;

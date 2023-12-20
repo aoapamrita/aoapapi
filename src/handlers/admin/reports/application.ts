@@ -3,26 +3,25 @@ import prisma from "../../../db";
 import { BadRequestError } from "../../../errors/bad-request-error";
 import XLSX from "xlsx";
 
-
 export const getApplicationReport = async (req, res) => {
   const { download } = req.query;
   const { examId } = req.body;
   let queryString = Prisma.sql`
-  
+
     `;
 
-    if (examId) {
-      queryString = Prisma.sql`
+  if (examId) {
+    queryString = Prisma.sql`
       SELECT C."fullname",C."phone",C."email",R."registrationNo",R."createdAt",TO_CHAR(R."createdAt", 'DD-MM-YYYY HH12:MI:SS AM') AS createdDate  FROM "Registration" R
 
   INNER JOIN "ExamApplication" EA ON R."examapplicationId" =  EA."id"
-   
+
   INNER JOIN "Candidate" C ON EA."candidateId" =  C."id"
-  
+
   WHERE R."examId" = ${examId}
   ORDER BY R."createdAt" DESC
         `;
-    }
+  }
 
   console.log(queryString);
 
@@ -38,8 +37,8 @@ export const getApplicationReport = async (req, res) => {
       AppNo: row.registrationNo,
       Name: row.fullname,
       EmailId: row.email,
-      PhoneNumber:row.phone,
-      RegisteredDateandTime:row.createddate
+      PhoneNumber: row.phone,
+      RegisteredDateandTime: row.createddate,
     }));
 
     console.log(formattedCounts);
@@ -63,11 +62,32 @@ export const getApplicationReport = async (req, res) => {
       // Send the workbook directly to the response
       res.end(XLSX.write(workbook, { bookType: "xlsx", type: "buffer" }));
     } else {
-    
-    return res.json(formattedCounts);
-  }
+      return res.json(formattedCounts);
+    }
   } catch (error) {
     console.log(error);
     throw new BadRequestError("Request cannot be processed");
   }
+};
+
+export const getRegisteredUsersByExam = async (req, res) => {
+  const { examid: examId } = req.params;
+
+  const candidates = await prisma.registration.findMany({
+    where: {
+      examId,
+    },
+    include: {
+      examapplication: {
+        include: {
+          candidate: true,
+        },
+      },
+    },
+    orderBy: {
+      registrationNo: "asc",
+    },
+  });
+
+  return res.json(candidates);
 };

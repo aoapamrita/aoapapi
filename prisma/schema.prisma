@@ -122,6 +122,7 @@ model Candidate {
 
   agentId Int?
   agent   Agent? @relation(fields: [agentId], references: [id])
+  LSQ     LSQ?
 }
 
 model ParentInfo {
@@ -145,6 +146,15 @@ model PlusTwoInfo {
   state       State?    @relation(fields: [stateId], references: [id])
   stateId     Int?
   otherState  String?
+}
+
+model LSQ {
+  id          Int       @id @default(autoincrement())
+  candidate   Candidate @relation(fields: [candidateId], references: [id])
+  candidateId String    @unique
+  relatedId   String?
+
+  createdAt DateTime @default(now())
 }
 
 model Utm {
@@ -236,12 +246,48 @@ model Registration {
   examId            String
   examapplication   ExamApplication     @relation(fields: [examapplicationId], references: [id])
   examapplicationId String
-  registrationNo    Int
+  registrationNo    Int                 @unique
   type              ExamApplicationType @default(ONLINE)
+  centersyncstatus  Boolean             @default(false)
+  centersynccomment String?
   createdAt         DateTime            @default(now())
+  Slot              Slot?
+  AdmitCard         AdmitCard?
 
   @@unique([examId, examapplicationId])
   @@unique([examId, registrationNo])
+}
+
+enum ExamCenterMode {
+  SCHEDULE
+  REATTEMPT
+}
+
+model Slot {
+  id               Int            @id @default(autoincrement())
+  registration     Registration   @relation(fields: [registrationNo], references: [registrationNo])
+  registrationNo   Int
+  examMode         ExamCenterMode
+  examDate         DateTime
+  examTime         String
+  selectedCityCode String
+
+  @@unique([registrationNo])
+}
+
+model AdmitCard {
+  id              Int            @id @default(autoincrement())
+  registration    Registration   @relation(fields: [registrationNo], references: [registrationNo])
+  registrationNo  Int
+  examMode        ExamCenterMode
+  locationName    String
+  examDate        DateTime // Updated to DateTime type
+  examTime        String
+  locationAddress String
+  pincode         String
+  phoneNumber     String
+
+  @@unique([registrationNo])
 }
 
 enum PaymentStatus {
