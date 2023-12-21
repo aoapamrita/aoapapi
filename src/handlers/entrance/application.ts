@@ -114,7 +114,12 @@ export const getApplication = async (req, res) => {
       id,
     },
     include: {
-      Registration: true,
+      Registration: {
+        include: {
+          Slot: true,
+          AdmitCard: true,
+        },
+      },
 
       candidate: {
         include: {
@@ -144,7 +149,12 @@ export const getApplicationByExam = async (req, res) => {
       candidateId,
     },
     include: {
-      Registration: true,
+      Registration: {
+        include: {
+          Slot: true,
+          AdmitCard: true,
+        },
+      },
 
       exam: {
         include: {

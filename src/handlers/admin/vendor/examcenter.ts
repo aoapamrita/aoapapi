@@ -4,6 +4,7 @@ import prisma from "../../../db";
 import mainqueue from "../../../queue";
 import { InternalServerError } from "../../../errors/internal-server-error";
 import { NotAuthorizedError } from "../../../errors/not-authorized-error";
+import { sendAdmitCardMail } from "../../email/admitcardmail";
 
 const apiKey = "6587ceff-28e9-44ac-8825-e26495ada87c";
 
@@ -358,6 +359,8 @@ export const createOrUpdateAdmitCard = async (req, res) => {
       update: data,
       create: data,
     });
+
+    sendAdmitCardMail(registrationNo);
 
     res.status(200).json({
       time: new Date().toISOString(),

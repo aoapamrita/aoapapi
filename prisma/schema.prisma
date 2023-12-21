@@ -285,7 +285,7 @@ model AdmitCard {
   examTime        String
   locationAddress String
   pincode         String
-  phoneNumber     String
+  phoneNumber     String?
 
   @@unique([registrationNo])
 }
