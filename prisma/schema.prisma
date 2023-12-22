@@ -183,8 +183,6 @@ enum ExamStatus {
   CLOSED
   APPLY
   SLOT
-  ADMIT
-  RANK
   PAUSE
 }
 
