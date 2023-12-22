@@ -4,7 +4,6 @@ import { InternalServerError } from "../../errors/internal-server-error";
 import crypto from "crypto";
 import { entranceWelcome } from "../email";
 import { entranceWelcomeAgent } from "../email/entrancewelcome";
-import { invokeAPI } from "../leadsquared/apirequest";
 
 export const createExam = async (req, res) => {
   const data = req.body;
@@ -257,6 +256,14 @@ export const examPaymentSuccess = async (req, res) => {
       registrationNo = lastRegNo + 1;
     }
 
+
+    const candidate = await prisma.candidate.findUnique({
+      where: {
+        id: updatedTransaction.candidateId,
+      },
+    });
+
+
     entranceWelcome(updatedTransaction.candidateId);
 
     try {
@@ -269,21 +276,8 @@ export const examPaymentSuccess = async (req, res) => {
       });
 
 
-      const candidate = await prisma.candidate.findUnique({
-        where: {
-          id: updatedTransaction.candidateId,
-        },
-      });
-
-      const candid = candidate.id;
-      const uname = candidate.fullname;
-   let uphone = candidate.phone;
-   let email = candidate.email;
-   let source = "";
-   const section = "App Fee Payment";
-   const paystatus = "Paid";
-   await invokeAPI({email: email,name: uname, phone: uphone, section: section, paystatus: paystatus,source: source,candid: candid},res);
-
+     
+     
       return res.redirect("/applications/payment/success");
     } catch (error) {
       console.log(error);
