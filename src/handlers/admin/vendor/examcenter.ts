@@ -5,6 +5,7 @@ import mainqueue from "../../../queue";
 import { InternalServerError } from "../../../errors/internal-server-error";
 import { NotAuthorizedError } from "../../../errors/not-authorized-error";
 import { sendAdmitCardMail } from "../../email/admitcardmail";
+import { format } from "date-fns";
 
 const apiKey = "6587ceff-28e9-44ac-8825-e26495ada87c";
 
@@ -20,6 +21,11 @@ export const verifyCandidateSync = async (req, res) => {
     Preferred_CityCode_1: "",
     Preferred_CityCode_2: "",
     Preferred_CityCode_3: "",
+    DOB: "",
+    AadharNumber: "",
+    ProfilePic: "",
+    CountryDialingCode: "",
+    MobileNumber: "",
   };
 
   try {
@@ -52,6 +58,18 @@ export const verifyCandidateSync = async (req, res) => {
     postData["Email"] = applnDetails.examapplication.candidate.email;
     postData["ApplicationNumber"] = `${applnDetails.registrationNo}`;
     postData["ExamMode"] = "SCHEDULE";
+    postData["DOB"] = format(
+      new Date(applnDetails.examapplication.candidate.dob),
+      "yyyy-MM-dd"
+    );
+    postData["AadharNumber"] =
+      applnDetails.examapplication.candidate.aadhaarnumber;
+    postData[
+      "ProfilePic"
+    ] = `https://res.cloudinary.com/dkzpmdjf0/image/upload/c_fill,h_250,w_250/${applnDetails.examapplication.candidate.photoid}.jpg`;
+    postData["CountryDialingCode"] =
+      applnDetails.examapplication.candidate.phonecode;
+    postData["MobileNumber"] = applnDetails.examapplication.candidate.phone;
 
     const applncities = applnDetails.examapplication.ApplicationCities;
 
@@ -182,6 +200,11 @@ export const verifyingAllCandidatesWorker = async (data) => {
         Preferred_CityCode_1: "",
         Preferred_CityCode_2: "",
         Preferred_CityCode_3: "",
+        DOB: "",
+        AadharNumber: "",
+        ProfilePic: "",
+        CountryDialingCode: "",
+        MobileNumber: "",
       };
 
       try {
@@ -215,6 +238,18 @@ export const verifyingAllCandidatesWorker = async (data) => {
         postData["Email"] = applnDetails.examapplication.candidate.email;
         postData["ApplicationNumber"] = `${applnDetails.registrationNo}`;
         postData["ExamMode"] = "SCHEDULE";
+        postData["DOB"] = format(
+          new Date(applnDetails.examapplication.candidate.dob),
+          "yyyy-MM-dd"
+        );
+        postData["AadharNumber"] =
+          applnDetails.examapplication.candidate.aadhaarnumber;
+        postData[
+          "ProfilePic"
+        ] = `https://res.cloudinary.com/dkzpmdjf0/image/upload/c_fill,h_250,w_250/${applnDetails.examapplication.candidate.photoid}.jpg`;
+        postData["CountryDialingCode"] =
+          applnDetails.examapplication.candidate.phonecode;
+        postData["MobileNumber"] = applnDetails.examapplication.candidate.phone;
 
         const applncities = applnDetails.examapplication.ApplicationCities;
 
@@ -336,6 +371,7 @@ export const createOrUpdateAdmitCard = async (req, res) => {
     ExamTime,
     LocationAddress,
     Pincode,
+    QRcode,
     PhoneNumber,
   } = req.body;
   const registrationNo = parseInt(ApplicationNumber);
@@ -348,6 +384,7 @@ export const createOrUpdateAdmitCard = async (req, res) => {
     examTime: ExamTime,
     locationAddress: LocationAddress,
     pincode: Pincode,
+    qrcode: QRcode,
     phoneNumber: PhoneNumber,
   };
 

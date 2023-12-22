@@ -283,6 +283,7 @@ model AdmitCard {
   examTime        String
   locationAddress String
   pincode         String
+  qrcode          String?
   phoneNumber     String?
 
   @@unique([registrationNo])
