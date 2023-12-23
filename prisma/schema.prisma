@@ -182,7 +182,8 @@ model Entrance {
 enum ExamStatus {
   CLOSED
   APPLY
-  SLOT
+  ENDAPPLY
+  ENDREG
   PAUSE
 }
 
@@ -193,6 +194,9 @@ model Exam {
   entranceId      String
   description     String
   status          ExamStatus        @default(PAUSE)
+  phaseno         Int               @default(0)
+  phaseenddate    DateTime?
+  slotstatus      Boolean           @default(false)
   ExamApplication ExamApplication[]
   Registration    Registration[]
 }
