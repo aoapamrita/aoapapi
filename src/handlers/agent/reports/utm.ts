@@ -93,7 +93,7 @@ export const downloadCandidatesByUtmSource = async (req, res) => {
     Phone: row.phone ? row.phone : "nil",
     State: row.state ? row.state.name : "nil",
     District: row.district ? row.district.name : "nil",
-    Profile_Updated: row.Onboarding.status ? "Done" : "Pending",
+    Profile_Updated: row.Onboarding.status ? "Completed" : "Pending",
   }));
 
   // Create a new workbook

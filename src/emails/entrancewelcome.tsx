@@ -112,6 +112,24 @@ export const EntranceWelcome = ({ name = "<Name>" }: CandidateWelcomeProps) => (
               Welcome to a world of possibilities. We look forward to meeting
               you in person.
             </Text>
+              <Text className="text-sm leading-6 text-gray-700">
+                To check your application status and profile, visit: {""}
+                <Link
+                  href="https://aee.amrita.edu/"
+                  className="text-pink-800 underline"
+                >
+                  Amrita Online Application Portal (AOAP) managed by Directorate of Admissions.
+                </Link>
+              </Text>
+              <Text className="text-sm leading-6 text-gray-700">
+                Join our official Telegram Channel for latest updates: {""}
+                <Link
+                  href="https://t.me/amritabtech"
+                  className="text-pink-800 underline"
+                > 
+                  AEEE2024
+                </Link>
+              </Text>
           </Section>
 
           <Text>
