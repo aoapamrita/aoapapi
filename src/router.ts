@@ -104,6 +104,7 @@ import {
   getExamByEntrance,
   getExamsByEntrance,
   registerForExam,
+  verifyTransaction,
 } from "./handlers/entrance/exam";
 import {
   addCityToApplication,
@@ -409,6 +410,7 @@ router.get(
   requireAuth,
   getJeeTransactionsByCandidate
 );
+router.post("/transactions/verify", verifyTransaction);
 
 router.post("/jee/paymentsuccess", jeePaymentSuccess);
 router.post("/jee/paymentfailure", jeePaymentFailure);

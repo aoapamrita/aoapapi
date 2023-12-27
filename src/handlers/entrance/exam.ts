@@ -461,6 +461,87 @@ export const examAgentPaymentFailure = async (req, res) => {
   return res.redirect(`/agent/candidate/payment/${applnno}/failure`);
 };
 
+export const verifyTransaction = async (req, res) => {
+  console.log("verifyTransaction");
+  const { txnid } = req.body;
+
+  // production details
+  const key = "ypfBaj";
+  const salt = "aG3tGzBZ";
+  const chkUrl = "https://info.payu.in/merchant/postservice?form=2";
+
+  //development details
+  //   const key = "aJ1WVm";
+  //   const salt = "hKmYSMBAzg5QOw64IV9MFtcu6BKaIyYA";
+  //   const chkUrl = "https://test.payu.in/merchant/postservice?form=2";
+
+  const command = "verify_payment";
+
+  const transactionDetails = await prisma.entrancePayments.findUnique({
+    where: {
+      txnid,
+    },
+    include: {
+      examapplication: {
+        include: {
+          exam: {
+            include: {
+              entrance: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const chkHeaders = {
+    accept: "application/json",
+    "Content-Type": "application/x-www-form-urlencoded",
+  };
+
+  const hashString = `${key}|${command}|${txnid}|${salt}`;
+
+  const hash = sha512(hashString);
+
+  const formData = new URLSearchParams();
+  formData.append("key", key);
+  formData.append("command", "verify_payment");
+  formData.append("var1", txnid);
+  formData.append("hash", hash);
+
+  console.log(formData);
+
+  const chkResponse = await fetch(chkUrl, {
+    method: "POST",
+    headers: chkHeaders,
+    body: formData,
+  });
+  const chkResponseData = await chkResponse.json();
+  if (!transactionDetails) {
+    throw new BadRequestError("Transaction not found");
+  }
+
+  // get all details and ssave to db
+
+  let txnstatus =
+    (chkResponseData as any).transaction_details[txnid].status === "success"
+      ? "SUCCESS"
+      : (chkResponseData as any).transaction_details[txnid].status === "failure"
+      ? "FAILED"
+      : transactionDetails.status;
+
+  //   const updatedTransaction = await prisma.entrancePayments.update({
+  //     where: {
+  //       txnid,
+  //     },
+  //     data: {
+  //       status: txnstatus,
+  //     },
+  //   });
+
+  return res.json({ chkResponseData });
+};
+
 function sha512(str) {
   return crypto.createHash("sha512").update(str).digest("hex");
 }
