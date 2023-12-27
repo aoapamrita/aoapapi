@@ -12,7 +12,7 @@ export async function invokeAPI(req,res) {
         },
       });
 
-      if(req.body.paystatus == 'App Fee Payment' || req.body.paystatus == 'Application Initiated'){
+      if(req.body.section == 'App Fee Payment' || req.body.section == 'Application Initiated'){
 
         const relatedId = candidatecheck.relatedId;
         const candid = candidatecheck.candidateId;
