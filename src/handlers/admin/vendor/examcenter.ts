@@ -6,6 +6,7 @@ import { InternalServerError } from "../../../errors/internal-server-error";
 import { NotAuthorizedError } from "../../../errors/not-authorized-error";
 import { sendAdmitCardMail } from "../../email/admitcardmail";
 import { format } from "date-fns";
+import { sendSlotBookMail } from "../../email/slotbookmail";
 
 const apiKey = "6587ceff-28e9-44ac-8825-e26495ada87c";
 
@@ -342,6 +343,8 @@ export const createOrUpdateExamSlot = async (req, res) => {
       update: data,
       create: data,
     });
+
+    sendSlotBookMail(registrationNo);
 
     res.status(200).json({
       time: new Date().toISOString(),
