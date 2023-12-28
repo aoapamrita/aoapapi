@@ -219,6 +219,14 @@ import {
   verifyAllCandidates,
   verifyCandidateSync,
 } from "./handlers/admin/vendor";
+import {
+  createVendor,
+  currentVendorUser,
+  forgotVendorPassword,
+  listVendors,
+  removeVendor,
+  vendorSignin,
+} from "./handlers/vendor";
 
 const router = Router();
 
@@ -481,6 +489,14 @@ router.post(
 router.get("/admin/counsellor/", requireAuth, getCounsellorDetails);
 
 router.post("/counsellor/forgotpassword", forgotCounsellorPassword);
+
+// vendor
+router.post("/admin/vendor/currentuser", requireAuth, currentVendorUser);
+router.get("/admin/vendor/list", listVendors);
+router.post("/admin/vendor/create", createVendor);
+router.post("/admin/vendor/signin", vendorSignin);
+router.post("/vendor/forgotpassword", forgotVendorPassword);
+router.delete("/admin/vendor/:id", removeVendor);
 
 // JEE Routes
 router.post("/admin/jee/", createJee);
