@@ -8,6 +8,10 @@ import {
   generatePass,
   verifyPassword,
 } from "../../utilities/passwordutils";
+import {
+  sendPasswordMailVendor,
+  sendWelcomeMailVendor,
+} from "../email/welcomevendor";
 
 export const listVendors = async (req, res) => {
   const items = await prisma.vendor.findMany({
@@ -46,7 +50,7 @@ export const createVendor = async (req, res) => {
     const user = await prisma.vendor.create({
       data,
     });
-    // sendWelcomeMailCounsellor({ email, password });
+    sendWelcomeMailVendor({ email, password });
     return res.json({ message: `User created ${user.email}` });
   } else {
     throw new BadRequestError("Cannot create user.");
@@ -84,7 +88,7 @@ export const forgotVendorPassword = async (req, res) => {
   const newPass = generatePass();
   const hash = await createHash(newPass);
 
-  const updated = await prisma.vendor.update({
+  await prisma.vendor.update({
     where: {
       id: vendor.id,
     },
@@ -94,11 +98,10 @@ export const forgotVendorPassword = async (req, res) => {
   });
 
   // send mail
-  //   sendPasswordMailCounsellor({
-  //     name: counsellor.name,
-  //     email: counsellor.email,
-  //     password: newPass,
-  //   });
+  sendPasswordMailVendor({
+    email: vendor.email,
+    password: newPass,
+  });
   // send success
 
   return res.json({ message: "done" });
