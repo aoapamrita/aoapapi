@@ -32,4 +32,5 @@ export {
   examPaymentFailure,
   examAgentPaymentSuccess,
   examAgentPaymentFailure,
+  verifyTransaction,
 } from "./exam";

@@ -12,7 +12,7 @@ export async function invokeAPI(req,res) {
         },
       });
 
-      if(req.body.paystatus == 'App Fee Payment' || req.body.paystatus == 'Application Initiated'){
+      if(req.body.section == 'App Fee Payment' || req.body.section == 'Application Initiated'){
 
         const relatedId = candidatecheck.relatedId;
         const candid = candidatecheck.candidateId;
@@ -93,7 +93,8 @@ const formattedDateTime = `${currentDatetime.getFullYear()}-${padZero(currentDat
           const date = formattedDateTime;
           const mx_Custom_1 = req.body.section;
           const mx_Custom_5 = req.body.paystatus;
-        PostActivity({ relatedId: relatedId, date: date, mx_Custom_1: mx_Custom_1, mx_Custom_5: mx_Custom_5, candid: candid},res);
+          const mx_Custom_2 = req.body.source;
+        PostActivity({ relatedId: relatedId, date: date, mx_Custom_1: mx_Custom_1, mx_Custom_5: mx_Custom_5, candid: candid, mx_Custom_2: mx_Custom_2},res);
    
         }
       //return res.json(response.data.Status);
@@ -115,8 +116,38 @@ const formattedDateTime = `${currentDatetime.getFullYear()}-${padZero(currentDat
   export async function PostActivity(req, res) {
     const apiUrl =
       'https://api-in21.leadsquared.com/v2/ProspectActivity.svc/Create?accessKey=u$rf48bd02912265b541feee4c981024107&secretKey=177a8e18aed6c8494b76efb863677ddd3b5353df';
-  
-    const postData = {
+ 
+      let postData;
+
+      if(req.mx_Custom_1 == 'Personal Details'){
+    postData = {
+      RelatedProspectId: req.relatedId,
+      ActivityEvent: 209,
+      ActivityNote: 'AOAP',
+      ProcessFilesAsync: true,
+      ActivityDateTime: req.date,
+      Fields: [
+        {
+          SchemaName: 'mx_Custom_1',
+          Value: req.mx_Custom_1,
+        },
+        {
+          SchemaName: 'mx_Custom_2',
+          Value: req.mx_Custom_2,
+        },
+        {
+          SchemaName: 'mx_Custom_3',
+          Value: 'B.Tech',
+        },
+        {
+          SchemaName: 'mx_Custom_5',
+          Value: req.mx_Custom_5,
+        },
+      ],
+    };
+  } else{
+
+    postData = {
       RelatedProspectId: req.relatedId,
       ActivityEvent: 209,
       ActivityNote: 'AOAP',
@@ -137,6 +168,8 @@ const formattedDateTime = `${currentDatetime.getFullYear()}-${padZero(currentDat
         },
       ],
     };
+
+  }
   
     // Set the request headers
     const headers = {

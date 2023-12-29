@@ -105,6 +105,7 @@ import {
   getExamByEntrance,
   getExamsByEntrance,
   registerForExam,
+  verifyTransaction,
 } from "./handlers/entrance/exam";
 import {
   addCityToApplication,
@@ -219,6 +220,14 @@ import {
   verifyAllCandidates,
   verifyCandidateSync,
 } from "./handlers/admin/vendor";
+import {
+  createVendor,
+  currentVendorUser,
+  forgotVendorPassword,
+  listVendors,
+  removeVendor,
+  vendorSignin,
+} from "./handlers/vendor";
 
 const router = Router();
 
@@ -411,6 +420,7 @@ router.get(
   requireAuth,
   getJeeTransactionsByCandidate
 );
+router.post("/transactions/verify", verifyTransaction);
 
 router.post("/jee/paymentsuccess", jeePaymentSuccess);
 router.post("/jee/paymentfailure", jeePaymentFailure);
@@ -481,6 +491,14 @@ router.post(
 router.get("/admin/counsellor/", requireAuth, getCounsellorDetails);
 
 router.post("/counsellor/forgotpassword", forgotCounsellorPassword);
+
+// vendor
+router.post("/admin/vendor/currentuser", requireAuth, currentVendorUser);
+router.get("/admin/vendor/list", listVendors);
+router.post("/admin/vendor/create", createVendor);
+router.post("/admin/vendor/signin", vendorSignin);
+router.post("/vendor/forgotpassword", forgotVendorPassword);
+router.delete("/admin/vendor/:id", removeVendor);
 
 // JEE Routes
 router.post("/admin/jee/", createJee);
