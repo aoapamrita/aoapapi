@@ -111,6 +111,10 @@ export const updateExam = async (req, res) => {
   const data = req.body;
   const id = req.params.id;
 
+  if (data.phaseenddate) {
+    data.phaseenddate = new Date(data.phaseenddate);
+  }
+
   const updatedExam = await prisma.exam.update({
     where: {
       id,
