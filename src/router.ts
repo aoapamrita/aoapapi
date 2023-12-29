@@ -61,6 +61,7 @@ import {
   createOtp,
   currentUser,
   getAllCandidatesInfo,
+  getAllCandidatesInfoByStatus,
   getCandidate,
   getCandidateById,
   getCandidateParent,
@@ -252,6 +253,7 @@ router.put("/candidate/:id", requireAuth, putCandidateById);
 router.put("/candidate/:id/parent", requireAuth, updateCandidateParentById);
 router.put("/candidate/:id/plustwo", requireAuth, updateCandidatePlustwoById);
 router.get("/candidates", getAllCandidatesInfo);
+router.get("/candidates", getAllCandidatesInfoByStatus);
 
 //master data
 router.get("/master/gender", requireAuth, getGender);

@@ -8,6 +8,7 @@ export {
 export {
   getCandidate,
   getCandidateById,
+  getAllCandidatesInfoByStatus,
   getAllCandidatesInfo,
 } from "./getCandidate";
 export { signout } from "./signout";
