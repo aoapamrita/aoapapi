@@ -282,7 +282,7 @@ export const examPaymentSuccess = async (req, res) => {
  let source = "";
  const section = "App Fee Payment";
  const paystatus = "Paid";
- await invokepaymentAPI({email: email,name: uname, phone: uphone, section: section, paystatus: paystatus,source: source,candid: candid},res);
+ invokepaymentAPI({email: email,name: uname, phone: uphone, section: section, paystatus: paystatus,source: source,candid: candid},res);
 
 
 

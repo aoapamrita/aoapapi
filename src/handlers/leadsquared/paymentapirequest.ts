@@ -65,11 +65,11 @@ const currentDatetime = new Date();
 
       
       // return res.json(lsqresponse);
-      return res.json(response.data);
+    //  return res.json(response.data);
     } catch (error) {
       // Handle errors
       console.error('Error:', error.message || error);
-      return res.json(req.paystatus);
+     // return res.json(req.paystatus);
     }
   }
 };
