@@ -1,4 +1,3 @@
-
 import { Row } from "@react-email/components";
 import prisma from "../../db";
 import XLSX from "xlsx";
@@ -220,8 +219,10 @@ export const getAllCandidatesInfo = async (req, res) => {
 
 
 // Get all candidates details w.r.t status : AR
-export const getAllCandidatesInfoByStatus = async (req, res) => {
+export const getAllCandidatesInfoByStatus = async  (req, res) => {
   
+  const { status = true } = req.query;
+
   console.log('In getAllCandidatesInfoByStatus');
  
   let candidates = [];
@@ -229,7 +230,7 @@ export const getAllCandidatesInfoByStatus = async (req, res) => {
   const allCandidates = await prisma.candidate.findMany({
     where: {
       Onboarding: {
-        status: true,
+        status: status,
       },
     },
 
