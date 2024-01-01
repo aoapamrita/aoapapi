@@ -17,6 +17,8 @@ export const getCandidate = async (req, res) => {
       state: true,
       district: true,
       city: true,
+      ParentInfo: true,
+      PlusTwoInfo: true,
     },
   });
   return res.json(candidate);

@@ -120,6 +120,7 @@ model Candidate {
   JEEApplication   JEEApplication[]
   JEEPayments      JEEPayments[]
 
+  isOMR Boolean @default(false)
   agentId Int?
   agent   Agent? @relation(fields: [agentId], references: [id])
   LSQ     LSQ?

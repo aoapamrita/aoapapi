@@ -91,7 +91,6 @@ export const putCandidateById = async (req, res) => {
   const { id } = req.params;
   const data = { ...req.body };
   if (data.dob) {
-    const dobstr = new Date(data.dob);
     data.dob = new Date(data.dob);
   }
 
