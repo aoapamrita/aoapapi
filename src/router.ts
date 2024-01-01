@@ -263,8 +263,8 @@ router.put("/candidate/:id", requireAuth, putCandidateById);
 router.put("/candidate/:id/parent", requireAuth, updateCandidateParentById);
 router.put("/candidate/:id/plustwo", requireAuth, updateCandidatePlustwoById);
 router.get("/candidates", getAllCandidatesInfo);
-router.get("/candidate/filter",  getAllCandidatesInfoByStatus);
-router.get("/candidate/applied",  getAllAppliedCandidatesInfo);
+router.get("/candidatefilter/:status",  getAllCandidatesInfoByStatus);
+router.get("/candidateapplied",  getAllAppliedCandidatesInfo);
 
 //master data
 router.get("/master/gender", requireAuth, getGender);

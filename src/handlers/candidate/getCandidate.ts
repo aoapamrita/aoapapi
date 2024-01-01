@@ -221,16 +221,20 @@ export const getAllCandidatesInfo = async (req, res) => {
 // Get all candidates details w.r.t status : AR
 export const getAllCandidatesInfoByStatus = async  (req, res) => {
   
-  const { status = true } = req.query;
 
-  console.log('In getAllCandidatesInfoByStatus');
+  // Get status value
+ const  {status}  = req.params;
+
+ // Convert status value to boolean
+ const isStatusTrue = status === 'true';
+
  
   let candidates = [];
 
   const allCandidates = await prisma.candidate.findMany({
     where: {
       Onboarding: {
-        status: status,
+        status: isStatusTrue,
       },
     },
 
@@ -279,6 +283,9 @@ export const getAllCandidatesInfoByStatus = async  (req, res) => {
   res.end(XLSX.write(workbook, { bookType: "xlsx", type: "buffer" }));
 };
 
+
+
+// Get applied candidates details : AR
 export const getAllAppliedCandidatesInfo = async (req, res) => {
   
   console.log('In getAllCandidatesInfo');
