@@ -127,6 +127,7 @@ export const updateExam = async (req, res) => {
 
 export const registerForExam = async (req, res) => {
   const { examId, examapplicationId } = req.body;
+  return res.json({ message: "Cannot be processed" });
 
   const successPayment = await prisma.entrancePayments.findMany({
     where: {
