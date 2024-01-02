@@ -210,6 +210,7 @@ import {
 } from "./handlers/reports";
 import {
   invokeAPI,
+  invokebulkAPI,
 } from "./handlers/leadsquared";
 import { createCrmSignin } from "./handlers/crm";
 import { getLoggedUser } from "./handlers/user/user";
@@ -570,5 +571,6 @@ router.post("/aee/slotconfirmation", createOrUpdateExamSlot);
 router.post("/aee/examlocation", createOrUpdateAdmitCard);
 
 router.post("/leadsquared/apirequest", invokeAPI);
+router.post("/leadsquared/lsqbulkAPI", invokebulkAPI);
 
 export default router;
