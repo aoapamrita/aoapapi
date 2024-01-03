@@ -1,7 +1,8 @@
 /node_modules
 .DS_Store
 /build
-
+/uploads
+/extracted
 # local env files
 .env
 .env*.local

@@ -83,12 +83,11 @@ export const verifyCandidateSync = async (req, res) => {
   }
 
   const headers = {
-    TokenID: "U@TUFnhDy6gur9B4",
+    TokenID: process.env.CBT_USERSYNC_TOKEN,
     "Content-Type": "application/json",
   };
 
-  const apiUrl =
-    "https://uat-pearsonvue.excelindia.com/AmritaSchedulerAPI/User/SyncUser";
+  const apiUrl = process.env.CBT_USERSYNC_URL;
 
   try {
     const { data } = await axios.post(apiUrl, postData, { headers });

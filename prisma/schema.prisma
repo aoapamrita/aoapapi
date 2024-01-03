@@ -120,9 +120,9 @@ model Candidate {
   JEEApplication   JEEApplication[]
   JEEPayments      JEEPayments[]
 
-  isOMR Boolean @default(false)
+  isOMR   Boolean @default(false)
   agentId Int?
-  agent   Agent? @relation(fields: [agentId], references: [id])
+  agent   Agent?  @relation(fields: [agentId], references: [id])
   LSQ     LSQ?
 }
 
@@ -274,6 +274,24 @@ model Slot {
   examDate         DateTime
   examTime         String
   selectedCityCode String
+
+  @@unique([registrationNo])
+}
+
+model OMRMigrate {
+  id             Int     @id @default(autoincrement())
+  registrationNo Int
+  fullname       String?
+  gender         String?
+  dob            String?
+  state          Int?
+  phone          String? @unique
+  phonecode      String? @default("+91")
+  category       String?
+  examcity1      Int?
+  examcity2      Int?
+  examcity3      Int?
+  folder         String?
 
   @@unique([registrationNo])
 }

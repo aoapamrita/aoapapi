@@ -40,7 +40,11 @@ app.use(
 );
 
 app.use(mCurrentUser);
-app.use(fileUpload());
+app.use(
+  fileUpload({
+    createParentPath: true,
+  })
+);
 app.use("/api", router);
 
 app.all("*", async (req, res) => {
