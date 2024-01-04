@@ -26,6 +26,7 @@
     "axios": "^1.6.2",
     "bcrypt": "^5.1.1",
     "bullmq": "^4.15.4",
+    "cloudinary": "^1.41.1",
     "connect-redis": "^7.1.0",
     "cookie-session": "^2.0.0",
     "cors": "^2.8.5",

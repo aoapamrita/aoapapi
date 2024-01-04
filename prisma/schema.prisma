@@ -233,6 +233,7 @@ model ExamApplication {
   ApplicationJEE          ApplicationJEE?
   ApplicationCities       ApplicationCities[]
   createdAt               DateTime                 @default(now())
+  OMRMigrate              OMRMigrate[]
 
   @@unique([examId, candidateId])
 }
@@ -279,19 +280,23 @@ model Slot {
 }
 
 model OMRMigrate {
-  id             Int     @id @default(autoincrement())
-  registrationNo Int
-  fullname       String?
-  gender         String?
-  dob            String?
-  state          Int?
-  phone          String? @unique
-  phonecode      String? @default("+91")
-  category       String?
-  examcity1      Int?
-  examcity2      Int?
-  examcity3      Int?
-  folder         String?
+  id                Int              @id @default(autoincrement())
+  registrationNo    Int
+  fullname          String?
+  gender            String?
+  dob               DateTime?
+  state             Int?
+  phone             String?
+  phonecode         String?          @default("+91")
+  category          String?
+  examcity1         Int?
+  examcity2         Int?
+  examcity3         Int?
+  photo             Bytes?
+  sign              Bytes?
+  examapplication   ExamApplication? @relation(fields: [examapplicationId], references: [id])
+  examapplicationId String?
+  comment           String?
 
   @@unique([registrationNo])
 }
