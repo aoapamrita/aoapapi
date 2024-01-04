@@ -120,10 +120,11 @@ model Candidate {
   JEEApplication   JEEApplication[]
   JEEPayments      JEEPayments[]
 
-  isOMR   Boolean @default(false)
-  agentId Int?
-  agent   Agent?  @relation(fields: [agentId], references: [id])
-  LSQ     LSQ?
+  isOMR      Boolean      @default(false)
+  agentId    Int?
+  agent      Agent?       @relation(fields: [agentId], references: [id])
+  LSQ        LSQ?
+  OMRMigrate OMRMigrate[]
 }
 
 model ParentInfo {
@@ -294,6 +295,8 @@ model OMRMigrate {
   examcity3         Int?
   photo             Bytes?
   sign              Bytes?
+  candidate         Candidate?       @relation(fields: [candidateId], references: [id])
+  candidateId       String?
   examapplication   ExamApplication? @relation(fields: [examapplicationId], references: [id])
   examapplicationId String?
   comment           String?

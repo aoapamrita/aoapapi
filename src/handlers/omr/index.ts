@@ -1,1 +1,5 @@
-export { handleOmrUpload, handleSyncCandidates } from "./omr";
+export {
+  handleOmrUpload,
+  handleSyncCandidates,
+  completeOMRRegistration,
+} from "./omr";

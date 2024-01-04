@@ -230,7 +230,11 @@ import {
   removeVendor,
   vendorSignin,
 } from "./handlers/vendor";
-import { handleOmrUpload, handleSyncCandidates } from "./handlers/omr";
+import {
+  completeOMRRegistration,
+  handleOmrUpload,
+  handleSyncCandidates,
+} from "./handlers/omr";
 
 const router = Router();
 
@@ -573,6 +577,7 @@ router.post("/aee/examlocation", createOrUpdateAdmitCard);
 
 router.post("/omr/upload", handleOmrUpload);
 router.get("/omr/synccandidates", handleSyncCandidates);
+router.post("/omr/completeregisration", completeOMRRegistration);
 
 router.post("/leadsquared/apirequest", invokeAPI);
 router.post("/leadsquared/lsqbulkAPI", invokebulkAPI);
