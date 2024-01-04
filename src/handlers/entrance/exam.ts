@@ -127,50 +127,89 @@ export const updateExam = async (req, res) => {
 
 export const registerForExam = async (req, res) => {
   const { examId, examapplicationId } = req.body;
-  return res.json({ message: "Cannot be processed" });
 
-  const successPayment = await prisma.entrancePayments.findMany({
+  const successPayment = await prisma.entrancePayments.findFirst({
     where: {
-      examapplicationId, // Replace with the actual application ID you want to filter by
+      examapplicationId,
       status: "SUCCESS",
+    },
+    include: {
+      examapplication: {
+        include: {
+          exam: true,
+        },
+      },
     },
   });
 
-  if (successPayment.length === 0) {
+  if (!successPayment) {
     throw new BadRequestError("Payment Pending");
   }
 
-  const lastEntry = await prisma.registration.findFirst({
-    where: { examId },
-    orderBy: { id: "desc" },
-  });
-
-  let registrationNo = 1000001;
-
-  if (lastEntry) {
-    const lastRegNo = lastEntry.registrationNo;
-    registrationNo = lastRegNo + 1;
-  }
-
-  try {
-    console.log("registration details", {
-      examId,
-      examapplicationId,
-      registrationNo,
-    });
-
-    const registration = await prisma.registration.create({
-      data: {
-        examId,
-        examapplicationId,
-        registrationNo,
+  if (successPayment.type == "AGENT") {
+    const lastEntry = await prisma.registration.findFirst({
+      where: {
+        examId: successPayment.examapplication.exam.id,
+        type: "AGENT",
       },
+      orderBy: { id: "desc" },
     });
-    return res.json(registration);
-  } catch (error) {
-    console.log(error);
-    throw new InternalServerError("Registration Failed. Please try again");
+    let registrationNo = 5000001;
+
+    if (lastEntry) {
+      const lastRegNo = lastEntry.registrationNo;
+      registrationNo = lastRegNo + 1;
+    }
+
+    entranceWelcomeAgent(successPayment.candidateId, registrationNo);
+    try {
+      await prisma.registration.create({
+        data: {
+          examId: successPayment.examapplication.exam.id,
+          examapplicationId: successPayment.examapplication.id,
+          registrationNo,
+          type: "AGENT",
+          createdAt: successPayment.updatedAt,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestError("Registration Unsuccessful");
+    }
+  } else if (successPayment.type == "ONLINE") {
+    const lastEntry = await prisma.registration.findFirst({
+      where: {
+        examId: successPayment.examapplication.exam.id,
+        type: "ONLINE",
+      },
+      orderBy: { id: "desc" },
+    });
+
+    let registrationNo = 1000001;
+
+    if (lastEntry) {
+      const lastRegNo = lastEntry.registrationNo;
+      registrationNo = lastRegNo + 1;
+    }
+
+    entranceWelcome(successPayment.candidateId);
+
+    try {
+      await prisma.registration.create({
+        data: {
+          examId: successPayment.examapplication.exam.id,
+          examapplicationId: successPayment.examapplication.id,
+          registrationNo,
+          createdAt: successPayment.updatedAt,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestError("Registration Unsuccessful");
+    }
   }
+
+  return res.json({ message: "done" });
 };
 
 export const examPaymentSuccess = async (req, res) => {
