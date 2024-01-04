@@ -29,6 +29,9 @@ export const getTransactionsByApplication = async (req, res) => {
     orderBy: {
       createdAt: "desc", // Sort by createdAt in descending order (latest to oldest)
     },
+    include: {
+      examapplication: true, 
+    },
   });
 
   return res.json(entrancePayments);
