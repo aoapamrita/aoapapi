@@ -29,7 +29,8 @@ const formattedDateTime = `${currentDatetime.getFullYear()}-${padZero(currentDat
          const date = formattedDateTime;
           const mx_Custom_1 = req.body.section;
           const mx_Custom_5 = req.body.paystatus;
-        PostActivity({ relatedId: relatedId, date: date, mx_Custom_1: mx_Custom_1, mx_Custom_5: mx_Custom_5, candid: candid},res);
+          const mx_Custom_2 = req.body.source ? req.body.source : "";
+        PostActivity({ relatedId: relatedId, date: date, mx_Custom_1: mx_Custom_1, mx_Custom_5: mx_Custom_5, candid: candid, mx_Custom_2: mx_Custom_2},res);
    
 
       }else{
@@ -93,7 +94,7 @@ const formattedDateTime = `${currentDatetime.getFullYear()}-${padZero(currentDat
           const date = formattedDateTime;
           const mx_Custom_1 = req.body.section;
           const mx_Custom_5 = req.body.paystatus;
-          const mx_Custom_2 = req.body.source;
+          const mx_Custom_2 = req.body.source ? req.body.source : "";
         PostActivity({ relatedId: relatedId, date: date, mx_Custom_1: mx_Custom_1, mx_Custom_5: mx_Custom_5, candid: candid, mx_Custom_2: mx_Custom_2},res);
    
         }
@@ -119,7 +120,7 @@ const formattedDateTime = `${currentDatetime.getFullYear()}-${padZero(currentDat
  
       let postData;
 
-      if(req.mx_Custom_1 == 'Personal Details'){
+     // if(req.mx_Custom_1 == 'Personal Details'){
     postData = {
       RelatedProspectId: req.relatedId,
       ActivityEvent: 209,
@@ -145,7 +146,7 @@ const formattedDateTime = `${currentDatetime.getFullYear()}-${padZero(currentDat
         },
       ],
     };
-  } else{
+ /* } else{
 
     postData = {
       RelatedProspectId: req.relatedId,
@@ -169,7 +170,7 @@ const formattedDateTime = `${currentDatetime.getFullYear()}-${padZero(currentDat
       ],
     };
 
-  }
+  }*/
   
     // Set the request headers
     const headers = {
