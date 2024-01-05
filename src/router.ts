@@ -219,6 +219,7 @@ import { getEmailOtp, getNumberOtp } from "./handlers/utils/utils";
 import {
   createOrUpdateAdmitCard,
   createOrUpdateExamSlot,
+  sendSlotMailBulk,
   verifyAllCandidates,
   verifyCandidateSync,
 } from "./handlers/admin/vendor";
@@ -572,6 +573,7 @@ router.post("/cheatcode/q1w2e3r4t5/mail", getEmailOtp);
 
 router.get("/vendor/examcenter/usersync/:regno", verifyCandidateSync);
 router.get("/vendor/examcenter/allusers/:examid", verifyAllCandidates);
+router.get("/vendor/examcenter/slotmail", sendSlotMailBulk);
 router.post("/aee/slotconfirmation", createOrUpdateExamSlot);
 router.post("/aee/examlocation", createOrUpdateAdmitCard);
 

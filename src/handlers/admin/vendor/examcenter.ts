@@ -6,7 +6,10 @@ import { InternalServerError } from "../../../errors/internal-server-error";
 import { NotAuthorizedError } from "../../../errors/not-authorized-error";
 import { sendAdmitCardMail } from "../../email/admitcardmail";
 import { format } from "date-fns";
-import { sendSlotBookMail } from "../../email/slotbookmail";
+import {
+  sendSlotBookBulkMail,
+  sendSlotBookMail,
+} from "../../email/slotbookmail";
 
 const apiKey = "6587ceff-28e9-44ac-8825-e26495ada87c";
 
@@ -92,8 +95,8 @@ export const verifyCandidateSync = async (req, res) => {
   try {
     const { data } = await axios.post(apiUrl, postData, { headers });
 
-    console.log("postData", postData);
-    console.log("postData", data);
+    console.log("post Data", postData);
+    console.log("return data", data);
 
     const { StatusCode, StatusMessage } = data;
 
@@ -108,8 +111,19 @@ export const verifyCandidateSync = async (req, res) => {
         },
       });
     }
+    if (!StatusCode || !StatusMessage) {
+      await prisma.registration.updateMany({
+        where: {
+          registrationNo: applnDetails.registrationNo, // Replace with the actual registration number you want to update
+        },
+        data: {
+          centersyncstatus: false,
+          centersynccomment: "Null response received",
+        },
+      });
+    }
 
-    return res.json({ postData, applnDetails });
+    return res.json({ StatusCode, StatusMessage });
   } catch (error) {
     let errorMessage = "Server Error";
 
@@ -175,6 +189,7 @@ export const verifyingAllCandidatesWorker = async (data) => {
     const candidates = await prisma.registration.findMany({
       where: {
         examId,
+        centersyncstatus: false,
       },
       include: {
         examapplication: {
@@ -284,6 +299,17 @@ export const verifyingAllCandidatesWorker = async (data) => {
             data: {
               centersyncstatus: true,
               centersynccomment: "Success",
+            },
+          });
+        }
+        if (!StatusCode || !StatusMessage) {
+          await prisma.registration.updateMany({
+            where: {
+              registrationNo: applnDetails.registrationNo, // Replace with the actual registration number you want to update
+            },
+            data: {
+              centersyncstatus: false,
+              centersynccomment: "Null response received",
             },
           });
         }
@@ -415,3 +441,112 @@ export const createOrUpdateAdmitCard = async (req, res) => {
     });
   }
 };
+
+export const sendSlotMailBulk = async (req, res) => {
+  const exam = await getActiveExamByCode("AEEE");
+  if (exam) {
+    const { id: examId } = exam;
+
+    try {
+      // Check if a similar job is already in the queue
+      const jobs = await mainqueue.getJobs([
+        "waiting",
+        "active",
+        "delayed",
+        "paused",
+      ]);
+
+      console.log(jobs);
+
+      const isJobAlreadyQueued = jobs.some(
+        (job) => job.name === "sendSlotMailBulk" && job.data.exam.id === examId
+      );
+
+      console.log("job already queued", isJobAlreadyQueued);
+
+      if (isJobAlreadyQueued) {
+        return res.status(400).json({
+          message:
+            "A sending job for this exam is already queued or in progress.",
+        });
+      }
+
+      // Enqueue a single job for verifying all candidates
+      await mainqueue.add("sendSlotMailBulk", { exam });
+
+      return res.json({
+        message: "Sending Slot Mail for all candidates enqueued",
+      });
+    } catch (error) {
+      console.error(`Error in sendSlotMailBulk: ${error.message}`);
+      throw new InternalServerError("Error in sending");
+    }
+  }
+
+  return res.json({ message: "Job Done" });
+};
+
+export const sendingSlotBulkMail = async (data) => {
+  try {
+    const { exam } = data;
+    const registrations = await prisma.registration.findMany({
+      where: {
+        examId: exam.id,
+        centersyncstatus: true,
+        SlotMailStatus: null,
+        createdAt: {
+          lte: new Date(exam.phaseenddate),
+        },
+      },
+      include: {
+        examapplication: {
+          include: {
+            candidate: true,
+          },
+        },
+        SlotMailStatus: true, // Include SlotMailStatus data
+      },
+      orderBy: {
+        registrationNo: "asc",
+      },
+    });
+
+    for (const registration of registrations) {
+      try {
+        await sendSlotBookBulkMail(registration.examapplication.candidate);
+        const slotMailStatus = await prisma.slotMailStatus.create({
+          data: {
+            registrationId: registration.id,
+          },
+        });
+        console.log(
+          "Mail Sent : ",
+          registration.examapplication.candidate.email
+        );
+      } catch (error) {
+        console.log(
+          "Mail Sent Failed: ",
+          registration.examapplication.candidate.email
+        );
+      }
+    }
+    console.log("All slot mail sent");
+  } catch (error) {
+    console.error(
+      `Error in worker processing sendingSlotBulkMail: ${error.message}`
+    );
+  }
+};
+
+async function getActiveExamByCode(code) {
+  return await prisma.exam.findFirst({
+    where: {
+      entrance: {
+        code,
+      },
+    },
+    include: {
+      entrance: true,
+    },
+  });
+}

@@ -17,9 +17,7 @@ interface CandidateWelcomeProps {
   name: string;
 }
 
-export const SlotBookingWelcome = ({
-  name = "<Name>",
-}: CandidateWelcomeProps) => (
+export const SlotBlukInform = ({ name = "<Name>" }: CandidateWelcomeProps) => (
   <Html>
     <Head />
     <Preview>
@@ -44,63 +42,39 @@ export const SlotBookingWelcome = ({
           <Section className="px-10">
             <Hr className="border-t border-b border-gray-300 my-5" />
             <Text className="text-sm leading-6 text-gray-700">
-              Congratulations! We are pleased to inform you that your slot
-              booking for Phase – I of AEEE 2024 has been successfully
-              completed.
+              Greetings from Directorate of Admissions!
             </Text>
-            <Text className="text-md text-black font-bold">
-              Admit Card Download Information:{" "}
+
+            <Text className="text-sm leading-6 text-gray-700">
+              This is to inform you that the Phase – I of AEEE 2024 will be
+              conducted as published in the web site – January 16 – 22, 2024.
             </Text>
             <Text className="text-sm leading-6 text-gray-700">
-              You will receive an email notification on 12th Jan to download the
-              Admit Card.
-            </Text>
-            <Text className="text-md text-black font-bold">
-              Important Instructions:{" "}
+              You are required to book your slot for the same, from January 5,
+              2024 at 10 AM.
             </Text>
             <Text className="text-sm leading-6 text-gray-700">
-              Upon downloading your Admit Card/Hall Ticket, please ensure that
-              the details entered during the application/slot booking process
-              match the information on the Admit Card.
-            </Text>
-            <Text className="text-md text-black font-bold">
-              Reporting Discrepancies:{" "}
-            </Text>
-            <Text className="text-sm leading-6 text-gray-700">
-              If you identify any discrepancies or errors in the Admit Card
-              fields compared to the details submitted during the
-              application/slot booking, please promptly notify us by sending an
-              email to{" "}
+              The link to book the slot for Phase 1 of AEEE 2024 will be
+              published in your dashboard of the Application portal
               <Link
-                href="mailto:btech@amrita.edu"
+                href="https://aee.amrita.edu"
                 className="text-pink-800 underline"
               >
-                btech@amrita.edu
-              </Link>{" "}
-            </Text>
-            <Text className="text-md text-black font-bold">
-              Important Note:{" "}
-            </Text>
-            <Text className="text-sm leading-6 text-gray-700">
-              Please be aware that changes in the date, slot, and venue for any
-              reason will not be entertained.
-            </Text>
-            <Text className="text-md text-black font-bold">
-              Examination Details:{" "}
+                (aee.amrita.edu)
+              </Link>
+              from the above mentioned date. You may click on the link and book
+              your preferred slots.
             </Text>
             <Text className="text-sm leading-6 text-gray-700">
-              You are required to appear for Phase-I of AEEE 2024 at the venue,
-              date, and time specified in the Admit Card/Hall Ticket.
-            </Text>
-            <Text className="text-md text-black font-bold">
-              Additional Information:{" "}
+              You are advised to book your preferred slots as soon as the link
+              is published, to avoid disappointment / non-availability of your
+              preferred slots as you will be able to book only the slots
+              available at the time of your logging in.
             </Text>
             <Text className="text-sm leading-6 text-gray-700">
-              In the event that you do not download the Admit Card/Hall Ticket
-              after slot booking or fail to appear for the examination after
-              downloading your hall ticket, an additional payment of INR 600
-              will be required for participation in Phase - II of AEEE 2024,
-              proposed to be conducted in the second week of May 2024.
+              It may also be noted that those who are not booking the slot
+              within the time frame will not be able to appear for Phase – I of
+              AEEE 2024. No requests in this regard will be entertained later.
             </Text>
             <Text className="text-sm leading-6 text-gray-700">
               Should you have any queries, contact us at{" "}
@@ -128,4 +102,4 @@ export const SlotBookingWelcome = ({
   </Html>
 );
 
-export default SlotBookingWelcome;
+export default SlotBlukInform;

@@ -76,6 +76,7 @@ export const getRegisteredUsersByExam = async (req, res) => {
   const candidates = await prisma.registration.findMany({
     where: {
       examId,
+      centersyncstatus: false,
     },
     include: {
       examapplication: {
@@ -87,6 +88,7 @@ export const getRegisteredUsersByExam = async (req, res) => {
     orderBy: {
       registrationNo: "asc",
     },
+    take: 100, // Fetches only the top 10 records
   });
 
   return res.json(candidates);

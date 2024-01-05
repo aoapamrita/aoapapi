@@ -258,9 +258,16 @@ model Registration {
   createdAt         DateTime            @default(now())
   Slot              Slot?
   AdmitCard         AdmitCard?
+  SlotMailStatus    SlotMailStatus?
 
   @@unique([examId, examapplicationId])
   @@unique([examId, registrationNo])
+}
+
+model SlotMailStatus {
+  id             Int          @id @default(autoincrement())
+  registration   Registration @relation(fields: [registrationId], references: [id])
+  registrationId Int          @unique
 }
 
 enum ExamCenterMode {

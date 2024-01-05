@@ -4,6 +4,8 @@ import fs from "fs";
 import path from "path";
 import prisma from "../../db";
 import { v2 as cloudinary } from "cloudinary";
+import mainqueue from "../../queue";
+import { InternalServerError } from "../../errors/internal-server-error";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -146,7 +148,57 @@ export const handleOmrUpload = async (req, res) => {
 export const handleSyncCandidates = async (req, res) => {
   // get all candidates from omrmigrate table
 
-  const candidates = await prisma.oMRMigrate.findMany();
+  try {
+    // Check if a similar job is already in the queue
+    const jobs = await mainqueue.getJobs([
+      "waiting",
+      "active",
+      "delayed",
+      "paused",
+    ]);
+
+    console.log(jobs);
+
+    const isJobAlreadyQueued = jobs.some(
+      (job) => job.name === "syncingOmrCandidates"
+    );
+
+    console.log("job already queued", isJobAlreadyQueued);
+
+    if (isJobAlreadyQueued) {
+      return res.status(400).json({
+        message:
+          "A verification job for this exam is already queued or in progress.",
+      });
+    }
+
+    // Enqueue a single job for verifying all candidates
+    await mainqueue.add("syncingOmrCandidates", {});
+
+    return res.json({
+      message: "Data for all OMR candidates to be synced enqueued",
+    });
+  } catch (error) {
+    console.error(`Error in syncingOmrCandidates: ${error.message}`);
+    throw new InternalServerError("Error in verifying");
+  }
+};
+
+export const syncingOmrCandidates = async (data) => {
+  const candidates = await prisma.oMRMigrate.findMany({
+    where: {
+      OR: [
+        {
+          candidateId: null,
+        },
+        {
+          examapplicationId: null,
+        },
+      ],
+    },
+  });
+
+  console.log("candidates count", candidates.length);
 
   // iterate all candidates
   for (const candidate of candidates) {
@@ -235,8 +287,8 @@ export const handleSyncCandidates = async (req, res) => {
           candidatecreatestatus = false;
         }
 
-        console.log("candidate data", candidatedata);
-        console.log("candidate create status", candidatecreatestatus);
+        // console.log("candidate data", candidatedata);
+        // console.log("candidate create status", candidatecreatestatus);
 
         if (candidatecreatestatus) {
           try {
@@ -283,7 +335,10 @@ export const handleSyncCandidates = async (req, res) => {
                       examapplicationId: appln.id,
                     },
                   });
-                  console.log(appln.id);
+                  console.log(
+                    "successfully completed",
+                    candidate.registrationNo
+                  );
                 } else {
                   await updateOMRComment(
                     candidate.id,
@@ -306,18 +361,39 @@ export const handleSyncCandidates = async (req, res) => {
           await updateOMRComment(candidate.id, "Not enough information");
         }
       } else {
-        await updateOMRComment(candidate.id, "Phone already exists");
+        // // update the application
+        if (candidateExists.id === candidate.candidateId) {
+          const exam = await getActiveExamByCode("AEEE");
+          if (exam) {
+            const appln = await createApplication(candidateExists, exam, [
+              candidate.examcity1,
+              candidate.examcity2,
+              candidate.examcity3,
+            ]);
+            if (appln) {
+              await prisma.oMRMigrate.update({
+                where: {
+                  id: candidate.id,
+                },
+                data: {
+                  examapplicationId: appln.id,
+                },
+              });
+              console.log(appln.id);
+            } else {
+              await updateOMRComment(candidate.id, "Application not created");
+            }
+          } else {
+            await updateOMRComment(candidate.id, "No Exam found");
+          }
+        } else {
+          await updateOMRComment(candidate.id, "Candidate already exists");
+        }
       }
     } else {
       await updateOMRComment(candidate.id, "Not enough information");
     }
   }
-
-  // create candidate
-  // create application
-  // update sync table
-
-  return res.json("photoresult");
 };
 
 async function getActiveExamByCode(code) {
@@ -426,5 +502,15 @@ export const completeOMRRegistration = async (req, res) => {
       type: "OMR",
     },
   });
+  if (registration) {
+    await prisma.oMRMigrate.deleteMany({
+      where: {
+        AND: [
+          { candidateId: omr.candidateId },
+          { examapplicationId: omr.examapplicationId },
+        ],
+      },
+    });
+  }
   return res.json({ message: "success" });
 };
