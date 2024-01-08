@@ -81,3 +81,26 @@ export const createEntranceTransaction = async (req, res) => {
     throw new BadRequestError("Transaction cannot be created");
   }
 };
+
+export const getAllTransaction = async (req, res) => {
+
+  let entrancepayments = await prisma.entrancePayments.findMany({
+    
+    include: {
+      candidate: true,
+      examapplication: {
+          include: {
+            exam: true,
+            Registration: {
+              select: {
+                registrationNo: true
+              }
+            },
+            EntrancePayments: true,
+          },
+        },
+    },
+  });
+  console.log("Payments", entrancepayments)
+  return res.json(entrancepayments);
+};

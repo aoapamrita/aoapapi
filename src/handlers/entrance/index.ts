@@ -2,6 +2,7 @@ export {
   getTransactionsByApplication,
   createEntranceTransaction,
   getTransactionsByCandidate,
+  getAllTransaction,
 } from "./transactions";
 
 export {

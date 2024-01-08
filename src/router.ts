@@ -136,6 +136,7 @@ import {
   createEntranceTransaction,
   getTransactionsByApplication,
   getTransactionsByCandidate,
+  getAllTransaction,
 } from "./handlers/entrance/transactions";
 
 import { importlocation, downloadExcel } from "./handlers/master";
@@ -203,6 +204,7 @@ import {
   searchApplication,
   searchCandidate,
   searchRegistration,
+  searchTransactionById,
 } from "./handlers/search";
 import {
   getFullAeeeDetailsByCandidateId,
@@ -416,6 +418,8 @@ router.get(
 
 router.post("/transactions/entrance/", requireAuth, createEntranceTransaction);
 router.get("/transactions/entrance/", requireAuth, getTransactionsByCandidate);
+router.get("/transactions/entrance/all/",requireAuth,  getAllTransaction);
+
 
 router.get(
   "/transactions/jee/application/:id",
@@ -528,6 +532,7 @@ router.put("/candidate/jee/application/:id", updateJeeApplication);
 router.post("/search/candidate", searchCandidate);
 router.post("/search/application", searchApplication);
 router.post("/search/registration", searchRegistration);
+router.post("/search/transaction", searchTransactionById);
 
 // agent reports
 router.post("/agent/reports/utm/:source", getCandidatesByUtmSource);
