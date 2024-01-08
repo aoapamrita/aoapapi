@@ -306,6 +306,7 @@ model OMRMigrate {
   candidateId       String?
   examapplication   ExamApplication? @relation(fields: [examapplicationId], references: [id])
   examapplicationId String?
+  regDate           DateTime?
   comment           String?
 
   @@unique([registrationNo])

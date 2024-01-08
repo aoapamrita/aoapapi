@@ -185,213 +185,376 @@ export const handleSyncCandidates = async (req, res) => {
 };
 
 export const syncingOmrCandidates = async (data) => {
-  const candidates = await prisma.oMRMigrate.findMany({
-    where: {
-      OR: [
-        {
-          candidateId: null,
-        },
-        {
-          examapplicationId: null,
-        },
-      ],
-    },
-  });
+  try {
+    const omrcandidates = await prisma.oMRMigrate.findMany();
+    for (const omrcandidate of omrcandidates) {
+      let candidate = await createCandidate(omrcandidate);
+      console.log("candidate", candidate?.fullname);
+      if (candidate) {
+        const isOnboarding = await createOnboarding(candidate);
+        console.log("onboarding", isOnboarding);
+        if (isOnboarding) {
+          const isPlusTwo = await createPlusTwoInfo(candidate, omrcandidate);
+          console.log("isPlusTwo", isPlusTwo);
+          if (isPlusTwo) {
+            const application = await createCanApplication(
+              candidate,
+              omrcandidate
+            );
+            console.log("application", application?.id);
+            if (application) {
+              if (application.status === "PENDING") {
+                const isApplicationJee = await createApplicationJEE(
+                  application
+                );
+                if (isApplicationJee) {
+                  const isApplicationCities = await createApplicationCities(
+                    application,
+                    omrcandidate
+                  );
+                  if (isApplicationCities) {
+                    // update application status to applied
+                    await prisma.examApplication.update({
+                      where: {
+                        id: application.id,
+                      },
+                      data: {
+                        status: "APPLIED",
+                      },
+                    });
+                  }
+                }
+              }
+              // update omr with application id
+              await prisma.oMRMigrate.update({
+                where: {
+                  id: omrcandidate.id,
+                },
+                data: {
+                  examapplicationId: application.id,
+                  comment: null,
+                },
+              });
+            }
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error(
+      `Error in worker processing verifyAllCandidates: ${error.message}`
+    );
+  }
+};
 
-  console.log("candidates count", candidates.length);
-
-  // iterate all candidates
-  for (const candidate of candidates) {
-    if (candidate.phone && candidate.examcity1) {
+const createCandidate = async (omrcandidate) => {
+  // check if omrcandidate has candidate id
+  // if so get the candidate and return it
+  let candidate = null;
+  if (omrcandidate.candidateId) {
+    candidate = await prisma.candidate.findUnique({
+      where: {
+        id: omrcandidate.candidateId,
+      },
+    });
+  } else {
+    if (omrcandidate.phone && omrcandidate.examcity1) {
       const candidateExists = await prisma.candidate.findUnique({
         where: {
-          phone: candidate.phone,
+          phone: omrcandidate.phone,
         },
       });
-      // todo check if application exists
-      if (!candidateExists) {
-        // get gender from text
+      if (candidateExists) {
+        await updateOMRComment(omrcandidate.id, "Candidate already exists");
+      } else {
         const gender = await prisma.gender.findFirst({
           where: {
             name: {
-              equals: candidate.gender,
+              equals: omrcandidate.gender,
               mode: "insensitive",
             },
           },
         });
-
         // get state from state code
         const state = await prisma.state.findFirst({
           where: {
-            code: candidate.state,
+            code: omrcandidate.state,
           },
         });
-
         const socialstatus = await prisma.socialStatus.findFirst({
           where: {
             name: {
-              equals: candidate.category,
+              equals: omrcandidate.category,
               mode: "insensitive",
             },
           },
         });
-
         let candidatecreatestatus = true;
-
+        let creationfailmssg = "Not Enough Information";
         let candidatedata = {
-          phone: candidate.phone,
-          phonecode: candidate.phonecode,
+          phone: omrcandidate.phone,
+          phonecode: omrcandidate.phonecode,
           isOMR: true,
           phoneverified: new Date(),
         };
-
-        if (candidatecreatestatus && candidate.fullname) {
-          candidatedata["fullname"] = candidate.fullname;
-        } else {
-          candidatecreatestatus = false;
+        if (candidatecreatestatus) {
+          if (omrcandidate.fullname) {
+            candidatedata["fullname"] = omrcandidate.fullname;
+          } else {
+            candidatecreatestatus = false;
+            creationfailmssg = "Name missing";
+          }
         }
-        if (candidatecreatestatus && candidate.dob) {
-          candidatedata["dob"] = candidate.dob;
-        } else {
-          candidatecreatestatus = false;
+        if (candidatecreatestatus) {
+          if (omrcandidate.dob) {
+            candidatedata["dob"] = omrcandidate.dob;
+          } else {
+            candidatecreatestatus = false;
+            creationfailmssg = "dob missing";
+          }
         }
-        if (candidatecreatestatus && gender) {
-          candidatedata["genderId"] = gender.id;
-        } else {
-          candidatecreatestatus = false;
+        if (candidatecreatestatus) {
+          if (gender) {
+            candidatedata["genderId"] = gender.id;
+          } else {
+            candidatecreatestatus = false;
+            creationfailmssg = "Gender missing";
+          }
         }
-        if (candidatecreatestatus && state) {
-        } else {
-          candidatecreatestatus = false;
+        if (candidatecreatestatus) {
+          if (!state) {
+            candidatecreatestatus = false;
+            creationfailmssg = "State missing";
+          }
         }
-        if (candidatecreatestatus && socialstatus) {
-          candidatedata["socialstatusId"] = socialstatus.id;
-        } else {
-          candidatecreatestatus = false;
+        if (candidatecreatestatus) {
+          if (socialstatus) {
+            candidatedata["socialstatusId"] = socialstatus.id;
+          } else {
+            candidatecreatestatus = false;
+            creationfailmssg = "Category missing";
+          }
         }
-
-        const photoBuffer = Buffer.from(candidate.photo);
-        const signBuffer = Buffer.from(candidate.sign);
-
+        const photoBuffer = Buffer.from(omrcandidate.photo);
+        const signBuffer = Buffer.from(omrcandidate.sign);
         const photoresult = await uploadToCloudinary(photoBuffer);
         const signresult = await uploadToCloudinary(signBuffer);
-
-        if (candidatecreatestatus && photoresult) {
-          candidatedata["photoid"] = photoresult["public_id"];
-        } else {
-          candidatecreatestatus = false;
+        if (candidatecreatestatus) {
+          if (photoresult) {
+            candidatedata["photoid"] = photoresult["public_id"];
+          } else {
+            candidatecreatestatus = false;
+            creationfailmssg = "Photo creation failed";
+          }
         }
-        if (candidatecreatestatus && signresult) {
-          candidatedata["signid"] = signresult["public_id"];
-        } else {
-          candidatecreatestatus = false;
+        if (candidatecreatestatus) {
+          if (signresult) {
+            candidatedata["signid"] = signresult["public_id"];
+          } else {
+            candidatecreatestatus = false;
+            creationfailmssg = "Sign creation failed";
+          }
         }
-
-        // console.log("candidate data", candidatedata);
-        // console.log("candidate create status", candidatecreatestatus);
-
         if (candidatecreatestatus) {
           try {
             const newcandidate = await prisma.candidate.create({
               data: candidatedata,
             });
-            if (newcandidate) {
-              const onboardingData = {
-                candidateId: newcandidate.id,
-              };
-              await prisma.onboarding.create({
-                data: onboardingData,
-              });
-
-              await prisma.plusTwoInfo.create({
-                data: {
-                  candidateId: newcandidate.id,
-                  stateId: state.id,
-                },
-              });
-              await prisma.oMRMigrate.update({
-                where: {
-                  id: candidate.id,
-                },
-                data: {
-                  candidateId: newcandidate.id,
-                },
-              });
-              // console.log("candidate", newcandidate);
-              // // get the aee entrance exam
-              const exam = await getActiveExamByCode("AEEE");
-              if (exam) {
-                const appln = await createApplication(newcandidate, exam, [
-                  candidate.examcity1,
-                  candidate.examcity2,
-                  candidate.examcity3,
-                ]);
-                if (appln) {
-                  await prisma.oMRMigrate.update({
-                    where: {
-                      id: candidate.id,
-                    },
-                    data: {
-                      examapplicationId: appln.id,
-                    },
-                  });
-                  console.log(
-                    "successfully completed",
-                    candidate.registrationNo
-                  );
-                } else {
-                  await updateOMRComment(
-                    candidate.id,
-                    "Application not created"
-                  );
-                }
-              } else {
-                await updateOMRComment(candidate.id, "No Exam found");
-              }
-            } else {
-              await updateOMRComment(
-                candidate.id,
-                "Candidate cannot be created"
-              );
-            }
+            candidate = newcandidate;
+            await prisma.oMRMigrate.update({
+              where: {
+                id: omrcandidate.id,
+              },
+              data: {
+                candidateId: candidate.id,
+              },
+            });
           } catch (error) {
-            await updateOMRComment(candidate.id, "Candidate Creation Failed");
+            await updateOMRComment(
+              omrcandidate.id,
+              "Candidate Creation Failed"
+            );
           }
         } else {
-          await updateOMRComment(candidate.id, "Not enough information");
-        }
-      } else {
-        // // update the application
-        if (candidateExists.id === candidate.candidateId) {
-          const exam = await getActiveExamByCode("AEEE");
-          if (exam) {
-            const appln = await createApplication(candidateExists, exam, [
-              candidate.examcity1,
-              candidate.examcity2,
-              candidate.examcity3,
-            ]);
-            if (appln) {
-              await prisma.oMRMigrate.update({
-                where: {
-                  id: candidate.id,
-                },
-                data: {
-                  examapplicationId: appln.id,
-                },
-              });
-              console.log(appln.id);
-            } else {
-              await updateOMRComment(candidate.id, "Application not created");
-            }
-          } else {
-            await updateOMRComment(candidate.id, "No Exam found");
-          }
-        } else {
-          await updateOMRComment(candidate.id, "Candidate already exists");
+          await updateOMRComment(omrcandidate.id, creationfailmssg);
         }
       }
     } else {
-      await updateOMRComment(candidate.id, "Not enough information");
+      await updateOMRComment(omrcandidate.id, "Phone or exam city missing");
+    }
+  }
+  return candidate;
+};
+
+const createOnboarding = async (candidate) => {
+  let onboarding = await prisma.onboarding.findUnique({
+    where: {
+      candidateId: candidate.id,
+    },
+  });
+
+  if (onboarding) {
+    return true;
+  } else {
+    try {
+      // create onboarding
+      const onboardingData = {
+        candidateId: candidate.id,
+      };
+      await prisma.onboarding.create({
+        data: onboardingData,
+      });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+};
+
+const createPlusTwoInfo = async (candidate, omrcandidate) => {
+  let plustwoinfo = await prisma.plusTwoInfo.findUnique({
+    where: {
+      candidateId: candidate.id,
+    },
+  });
+
+  if (plustwoinfo) {
+    return true;
+  } else {
+    try {
+      // create plustwoinfo
+      const state = await prisma.state.findFirst({
+        where: {
+          code: omrcandidate.state,
+        },
+      });
+      await prisma.plusTwoInfo.create({
+        data: {
+          candidateId: candidate.id,
+          stateId: state.id,
+        },
+      });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+};
+
+const createCanApplication = async (candidate, omrcandidate) => {
+  let application = null;
+
+  if (omrcandidate.examapplicationId) {
+    application = await prisma.examApplication.findUnique({
+      where: {
+        id: omrcandidate.examapplicationId,
+      },
+    });
+  } else {
+    const exam = await getActiveExamByCode("AEEE");
+    if (exam) {
+      const candidateapplication = await prisma.examApplication.findUnique({
+        where: {
+          examId_candidateId: {
+            examId: exam.id,
+            candidateId: candidate.id,
+          },
+        },
+      });
+      if (candidateapplication) {
+        application = candidateapplication;
+      } else {
+        try {
+          const randomNumber = Math.floor(Date.now());
+          let reference = `${exam.entrance.code}-${randomNumber}`;
+          let type = ExamApplicationType.OMR;
+          const applndata = {
+            examId: exam.id,
+            candidateId: candidate.id,
+            reference,
+            type,
+          };
+          let newapplication = await prisma.examApplication.create({
+            data: applndata,
+          });
+          application = newapplication;
+        } catch (error) {
+          await updateOMRComment(
+            omrcandidate.id,
+            "Application creation failed"
+          );
+        }
+      }
+    } else {
+      await updateOMRComment(omrcandidate.id, "No Exam found");
+    }
+  }
+  return application;
+};
+
+const createApplicationJEE = async (application) => {
+  let applicationjee = await prisma.applicationJEE.findUnique({
+    where: {
+      examapplicationId: application.id,
+    },
+  });
+  if (applicationjee) {
+    return true;
+  } else {
+    // create applicationjee
+    try {
+      await prisma.applicationJEE.create({
+        data: {
+          examapplicationId: application.id,
+        },
+      });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+};
+
+const createApplicationCities = async (application, omrcandidate) => {
+  let applicationcities = await prisma.applicationCities.findMany({
+    where: {
+      examapplicationId: application.id,
+    },
+  });
+  if (applicationcities.length > 0) {
+    return true;
+  } else {
+    const exam = await getActiveExamByCode("AEEE");
+    // create application cities
+    try {
+      const examcities = [
+        omrcandidate.examcity1,
+        omrcandidate.examcity2,
+        omrcandidate.examcity3,
+      ];
+      for (const city of examcities) {
+        if (city) {
+          const excity = await prisma.examCity.findFirst({
+            where: {
+              entranceId: exam.entrance.id,
+              city: {
+                code: city,
+              },
+            },
+          });
+          if (excity) {
+            await prisma.applicationCities.create({
+              data: {
+                examapplicationId: application.id,
+                examcityId: excity.id,
+              },
+            });
+          }
+        }
+      }
+      return true;
+    } catch (error) {
+      return false;
     }
   }
 };
@@ -500,6 +663,7 @@ export const completeOMRRegistration = async (req, res) => {
       examapplicationId: omr.examapplicationId,
       registrationNo: omr.registrationNo,
       type: "OMR",
+      createdAt: omr.regDate ? omr.regDate : null,
     },
   });
   if (registration) {

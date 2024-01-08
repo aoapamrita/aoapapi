@@ -51,7 +51,7 @@ export const SlotBlukInform = ({ name = "<Name>" }: CandidateWelcomeProps) => (
             </Text>
             <Text className="text-sm leading-6 text-gray-700">
               You are required to book your slot for the same, from January 5,
-              2024 at 10 AM.
+              2024 at 4 PM.
             </Text>
             <Text className="text-sm leading-6 text-gray-700">
               The link to book the slot for Phase 1 of AEEE 2024 will be

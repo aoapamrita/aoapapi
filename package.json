@@ -7,7 +7,7 @@
     "start:dev": "npx nodemon",
     "mail:dev": "email dev --port 8888 --dir src/emails",
     "build": "rimraf ./build && tsc",
-    "start": "npm run build && pm2 start build/index.js --name aoap-api"
+    "start": "npm run build && pm2 start build/index.js -i max --name aoap-api"
   },
   "keywords": [],
   "author": "",
