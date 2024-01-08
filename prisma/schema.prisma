@@ -283,6 +283,7 @@ model Slot {
   examDate         DateTime
   examTime         String
   selectedCityCode String
+  createdAt   DateTime   @default(now())
 
   @@unique([registrationNo])
 }
@@ -308,6 +309,7 @@ model OMRMigrate {
   examapplicationId String?
   regDate           DateTime?
   comment           String?
+  createdAt         DateTime         @default(now())
 
   @@unique([registrationNo])
 }
